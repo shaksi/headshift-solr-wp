@@ -273,10 +273,7 @@ function s4w_search_form() {
                 <input type="hidden" id="offset" name="offset" value="%s"/>
                 <input type="hidden" id="count" name="count" value="%s"/>
                 <input type="submit" id="searchbtn" />
-              </form>
-              <p class="google-search">
-                <a href="?s='.get_search_query().'&type=google&searchsubmit=Search">Why not search CDKN trusted sites for <em id="resultqry">'.get_search_query().'</em>?</a>
-              </p>';
+              </form>';
     $output= __($form, 'solr4wp');
     $chkquery = ($_POST['chkquery']==1)?'checked="yes"':'';
 
@@ -335,16 +332,68 @@ function s4w_search_results() {
           $header = $results->responseHeader;
           $teasers = get_object_vars($results->highlighting);
         
-          if ($output_info) {
-            $outinfo = __('<div id="resultinfo"><p>Found <em id="resultcnt">%d</em> results for <em id="resultqry">%s</em> in <em id="qrytime">%.3f</em> seconds.</p></div><div id="infoclear"></div>', 'solr4wp'); 
-            printf($outinfo, $response->numFound, htmlspecialchars($qry), $header->QTime/1000);
-          }
+          
         
        
         
-          if ($output_facets) {
+          print(__('<section id="search-results">', 'solr4wp'));
+					print(__('<h1>Search Results</h1>', 'solr4wp'));
+        	if ($output_info) {
+            $outinfo = __('<h2 id="resultinfo"><p>Found <em id="resultcnt">%d</em> results for <em id="resultqry">%s</em> in <em id="qrytime">%.3f</em> seconds.</p></h2>', 'solr4wp'); 
+            printf($outinfo, $response->numFound, htmlspecialchars($qry), $header->QTime/1000);
+          }
+
+          if ($response->numFound == 0) {
+              printf(__('<div id="noresults">No Results Found</div>', 'solr4wp'));
+          } else {
+                          
+              foreach ( $response->docs as $doc ) {
+                  print(__('<article class="result">', 'solr4wp'));
+                  $titleout = __('<h2><a href="%s">%s</a></h2><h3>by <em id="resultauthor">%s</em> has a score of <em id="resultscore">%f</em></h3>', 'solr4wp');
+                  printf($titleout, $doc->permalink, $doc->title, $doc->author, $doc->score);
+                  $docid = strval($doc->id);
+                  $docteaser = $teasers[$docid];
+                  if ($docteaser->content) {
+                      printf(__('<p>...%s...</p></div>', 'solr4wp'), implode('...', $docteaser->content));
+                  } else {
+                      $words = split(' ', $doc->content);
+                      $teaser = implode(' ', array_slice($words, 0, 30));
+                      printf(__('<p>%s...</p></article>', 'solr4wp'), $teaser);
+                  }
+              }
+          }
+
+  				if ($output_pager) {      
+                # calculate the number of pages
+                $numpages = ceil($response->numFound / $count);
+                $currentpage = ceil($offset / $count) + 1;
+
+                if ($numpages == 0) {
+                    $numpages = 1;
+                }
+
+                print(__('<div id="resultpager"><ul>', 'solr4wp'));
+                foreach (range(1, $numpages) as $pagenum) {
+                  if ( $pagenum != $currentpage ) {
+                      $offsetnum = ($pagenum - 1) * $count;
+                      $pagenum = __($pagenum, 'solr4wp');
+                      $itemout = '<li><a href="?s=%s&fq=%s&offset=%d&count=%d">%d</a></li>';
+                      
+                      printf($itemout, urlencode($qry),htmlspecialchars(stripslashes($fq)),  $offsetnum, $count, $pagenum);
+                  } 
+                   else {
+                      printf(__('<li>%d</li>', 'solr4wp'), $pagenum);
+                  }
+                }
+                print(__('</ul></div><div id="pagerclear"></div>', 'solr4wp'));
+            }
+
+          printf(__('</section>', 'solr4wp'));
+
+
+					if ($output_facets) {
             # handle facets
-            print(__('<div id="facets"><ul class="facets">', 'solr4wp'));
+            print(__('<aside id="sidebar"><ul class="facets">', 'solr4wp'));
             if($results->facet_counts) {
               foreach ($results->facet_counts->facet_fields as $facetfield => $facet) {
                 if ( ! get_object_vars($facet) ) {
@@ -400,10 +449,8 @@ function s4w_search_results() {
               }
             }
           }
-        
-          print(__('</ul></div>', 'solr4wp'));
-        
-          //show the used facets
+        	
+					//show the used facets
           if(count($result_facet_used)>0) {
             print '<div class="result_facets_used">';
   					print '<p>To remove a search filter, click [x]</p>';
@@ -412,60 +459,16 @@ function s4w_search_results() {
             }
             print '</div>';
           }
+
+          print(__('</ul></aside>', 'solr4wp'));
         
-          print(__('<div id="results">', 'solr4wp'));
-        
-          if ($response->numFound == 0) {
-              printf(__('<div id="noresults">No Results Found</div>', 'solr4wp'));
-          } else {
-                          
-              foreach ( $response->docs as $doc ) {
-                  print(__('<div class="result">', 'solr4wp'));
-                  $titleout = __('<h2><a href="%s">%s</a></h2><h3>by <em id="resultauthor">%s</em> has a score of <em id="resultscore">%f</em></h3>', 'solr4wp');
-                  printf($titleout, $doc->permalink, $doc->title, $doc->author, $doc->score);
-                  $docid = strval($doc->id);
-                  $docteaser = $teasers[$docid];
-                  if ($docteaser->content) {
-                      printf(__('<p>...%s...</p></div>', 'solr4wp'), implode('...', $docteaser->content));
-                  } else {
-                      $words = split(' ', $doc->content);
-                      $teaser = implode(' ', array_slice($words, 0, 30));
-                      printf(__('<p>%s...</p></div>', 'solr4wp'), $teaser);
-                  }
-              }
-          }
-
-  				if ($output_pager) {      
-                # calculate the number of pages
-                $numpages = ceil($response->numFound / $count);
-                $currentpage = ceil($offset / $count) + 1;
-
-                if ($numpages == 0) {
-                    $numpages = 1;
-                }
-
-                print(__('<div id="resultpager"><ul>', 'solr4wp'));
-                foreach (range(1, $numpages) as $pagenum) {
-                  if ( $pagenum != $currentpage ) {
-                      $offsetnum = ($pagenum - 1) * $count;
-                      $pagenum = __($pagenum, 'solr4wp');
-                      $itemout = '<li><a href="?s=%s&fq=%s&offset=%d&count=%d">%d</a></li>';
-                      
-                      printf($itemout, urlencode($qry),htmlspecialchars(stripslashes($fq)),  $offsetnum, $count, $pagenum);
-                  } 
-                   else {
-                      printf(__('<li>%d</li>', 'solr4wp'), $pagenum);
-                  }
-                }
-                print(__('</ul></div><div id="pagerclear"></div>', 'solr4wp'));
-            }
-
-          printf(__('</div>', 'solr4wp'));
-          print(__('</div>', 'solr4wp'));
-
+          
       }
   } 
+
 }
+
+
 
 function s4w_print_taxo($facet, $taxo, $prefix, $fqstr, $field, $facet_used='facet_not_used') {
     

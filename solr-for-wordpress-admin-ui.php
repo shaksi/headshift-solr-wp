@@ -19,7 +19,7 @@ $parent_taxonomy = get_taxonomies(array('_builtin'=>FALSE),'names');
 $parent_taxonomy['categories'] = 'categories';
 $parent_taxonomy['tags'] = 'tags';
 
-krumo($parent_taxonomy);
+// krumo($parent_taxonomy);
 //get a a list of all the available content types so we render out some options
 $post_types = s4w_get_all_post_types();
 $indexable_content = get_option('s4w_content_index');
