@@ -1,5 +1,25 @@
+<form method="get" action ="<?php $_SERVER["REQUEST_URI"]?>">
+<input type="text" name="q" value="<?php _e(get_option('s4w_solr_port'), 'solr4wp'); ?>" />
+<input type="submit" value="Search"/>
+</form>
 <?php 
-$parent_taxonomy = get_taxonomies();
+
+$q = ($_GET[q])?$_GET[q]:'*:*';
+$fq= stripslashes($_GET['fq']);
+$path = get_option('s4w_solr_path');
+// krumo($path);
+// krumo( s4w_get_solr());
+  //solr_query_ruby_core($q,$fq);
+
+?>
+
+
+<?php
+$parent_taxonomy = get_taxonomies(array('_builtin'=>FALSE),'names');
+$parent_taxonomy['categories'] = 'categories';
+$parent_taxonomy['tags'] = 'tags';
+
+krumo($parent_taxonomy);
 //get a a list of all the available content types so we render out some options
 $post_types = s4w_get_all_post_types();
 $indexable_content = get_option('s4w_content_index');
@@ -94,27 +114,28 @@ $indexable_content = get_option('s4w_content_index');
         <th scope="row" style="width:100px;float:left;margin-left:20px;"><?php _e('Category Facet as Taxonomy', 'solr4wp') ?></th>
         <td><input type="checkbox" name="s4w_cat_as_taxo" value="1" <?php echo s4w_checkCheckbox('s4w_cat_as_taxo'); ?> /></td>
     </tr>
-<?php $x=0 ;foreach ($parent_taxonomy as $parent) { 
-
-        if ($parent != 'nav_menu' && $parent != 'link_category') {
-        $parent = ($parent=='category')?'categories':$parent;
-        $parent = ($parent=='post_tag')?'tags':$parent;
-        
+    
+<?php $x=0 ;
+      foreach ($parent_taxonomy as $parent => $pname) { 
+        if ($parent !='categories' || $parent !=' tag') {
+          $pname = $pname."_taxonomy";
+        }
+        $parent = ucfirst(str_replace(array('-','_'),' ',$parent));
         if($x!==0 && $x%2===0)  echo '</tr>';
         
         if($x%2===0) echo '<tr valign="aaahk">';
         $x++;
   ?> 
-        <th scope="row" ><?php _e(ucfirst($parent). ' as Facet', 'solr4wp') ?></th>
-        <td><input type="checkbox" name="s4w_facets[<?php echo $parent; ?>]" value="1" <?php echo s4w_checkCheckbox('s4w_facets', $parent); ?> /></td>
+        <th scope="row" ><?php _e($parent. ' as Facet', 'solr4wp') ?></th>
+        <td><input type="checkbox" name="s4w_facets[<?php echo $pname; ?>]" value="1" <?php echo s4w_checkCheckbox('s4w_facets', $pname); ?> /></td>
    <?php     
 
-        }
+
       }?>
       
     <tr valign="top">
         <th scope="row" ><?php _e('Post date as Facet', 'solr4wp') ?></th>
-        <td><input type="checkbox" name="s4w_facets[postdate]" value="1" <?php echo s4w_checkCheckbox('s4w_facets','postdate'); ?> /></td>
+        <td><input type="checkbox" name="s4w_facets[postdate_dt]" value="1" <?php echo s4w_checkCheckbox('s4w_facets','postdate_dt'); ?> /></td>
         <th scope="row" style="width:100px;float:left;margin-left:20px;"><?php _e('Language as Facet', 'solr4wp') ?></th>
         <td><input type="checkbox" name="s4w_facets[language]" value="1" <?php echo s4w_checkCheckbox('s4w_facets', 'language'); ?> /></td>
     </tr>

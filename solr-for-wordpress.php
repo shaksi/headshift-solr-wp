@@ -112,10 +112,10 @@ function s4w_build_document( $post_info ) {
     // $iso_date = "2010-10-04T12:30:21Z";
     $strdate = strtotime($post_info->post_date);
     $iso_date = gmdate("Y-m-d", $strdate)."T".gmdate("H:i:s", $strdate)."Z";  
-    $doc->setfield( 'postdate',  $iso_date);
+    $doc->setfield( 'postdate_dt',  $iso_date);
     
     $language = s4w_get_post_language($post_info->ID);
-  
+    
     $doc->setfield( 'language',  $language->language_code);
     
     $categories = get_the_category($post_info->ID);
@@ -136,8 +136,7 @@ function s4w_build_document( $post_info ) {
       $terms = get_the_terms( $post_info->ID, $parent );
       if ((array) $terms === $terms) {
         foreach ($terms as $term) {
-          $parent = str_replace('cats','s',$parent);
-          $parent = str_replace('cdkn_','',$parent);
+          $parent = $parent."_taxonomy";
           $doc->addField($parent, $term->name);
         }
       }
@@ -146,7 +145,7 @@ function s4w_build_document( $post_info ) {
     $tags = get_the_tags($post_info->ID);
     if ( ! $tags == NULL ) { 
       foreach( $tags as $tag ) {
-        $doc->addField('themes', $tag->name);
+        $doc->addField('tags', $tag->name);
       }
     }
   } 
@@ -351,7 +350,8 @@ function s4w_search_results() {
                 if ( ! get_object_vars($facet) ) {
                   continue;
                 }
-                printf(__('<li class="facet"><h3>%s</h3><ul class="facetitems">', 'solr4wp'), ucwords($facetfield));
+                $facetfield_mod = trim(ucwords(str_replace(array('_taxonomy','_dt','_'),' ',$facetfield)));
+                printf(__('<li class="facet"><h3>%s</h3><ul class="facetitems">', 'solr4wp'), $facetfield_mod);
                 # categories is a taxonomy
                 if ($categoy_as_taxonomy && $facetfield == 'categories') {
                   # generate taxonomy and counts
@@ -386,14 +386,14 @@ function s4w_search_results() {
 
                       $faceturl = str_replace("=%7C%7C", "=", $faceturl);
 
-                      $result_facet_used[] = sprintf(__('%s<a href="%s"> [X]</a>','solr4wp'),  ($facetval=='post') ?'News':ucfirst($facetval), $faceturl);
+                      $result_facet_used[] = sprintf(__('%s<a href="%s"> [X]</a>','solr4wp'), $facetval, $faceturl);
                       $facet_used = "facet_used";
                      }
                       else {
                        $faceturl = sprintf(__('?s=%s&fq=%s:%s%s', 'solr4wp'), $qry, $facetfield, urlencode('"' . $facetval . '"'), $fqstr);
                        $facet_used = "facet_not_used";
                     }
-                  printf(__('<li class="facetitem %s"><a href="%s">%s</a> (%d)</li>', 'solr4wp'), $facet_used, $faceturl,  ($facetval=='post') ?'News':ucfirst($facetval), $facetcnt);
+                  printf(__('<li class="facetitem %s"><a href="%s">%s</a> (%d)</li>', 'solr4wp'), $facet_used, $faceturl,  ucfirst($facetval), $facetcnt);
                   }
                 }
                 print(__('</ul></li>', 'solr4wp'));
@@ -510,13 +510,7 @@ function s4w_query( $qry, $offset, $count, $fq, $sort=NULL) {
     $facet_fields = array();
     $number_of_tags  = get_option('s4w_max_display_tags');
     $required_facets = get_option('s4w_facets');  
-    
-    foreach(array_keys($required_facets) as $facet_name) {
-      $facet_name = str_replace('cats','s',$facet_name);
-      $facet_name = str_replace('cdkn_','',$facet_name);
-      $facet_fields[] = $facet_name;
-    }
-
+    $facet_fields    = array_keys($required_facets );  
     if ( $solr ) {
         $params = array();
         $qry = $solr->escape($qry);
@@ -542,7 +536,7 @@ function s4w_query( $qry, $offset, $count, $fq, $sort=NULL) {
           //if there is no search time and sort order has not been specified
           //order the output by postdate
           if(strlen($sort)<1) {
-            $params['sort'] = "postdate asc";
+            $params['sort'] = "postdate_dt asc";
           }
         }
         else {
@@ -611,7 +605,10 @@ function s4w_filter_str2list($input) {
 }
 
 function s4w_filter_list2str($input) {
-    return implode(',', $input);
+  if(count($input)>0) {
+    $output =  @implode(',', $input);
+  }
+  return $output;
 }
 
 function s4w_add_pages() {
@@ -802,6 +799,67 @@ function s4w_get_facet_result_count($fqitms, $searchtxt="") {
     $output->msg    = 'No query facets provided';
   }
   return $output;
+}
+
+function solr_query_ruby_core($qry, $fq) {
+  // krumo($qry);
+  // krumo($fq);
+     $solr = s4w_get_solr();
+     $response = NULL;
+
+      
+      $params = array();
+      //$qry =  $solr->escape($qry);
+  
+
+      $params['facet'] = 'true';
+      $params['facet.field']='source';
+      $params['fq'] = $fq;
+      $results = $solr->search($qry, 0, 100, $params);
+      if ( ! $results->getHttpStatus() == 200 ) { 
+          return;
+      }
+  
+      echo $before_widget;
+      if ( $title )
+          echo $before_title . $title . $after_title;
+      $mltresults = $response->moreLikeThis;
+      
+       if($results->facet_counts) {
+          foreach ($results->facet_counts->facet_fields as $facetfield => $facet) {
+           foreach ($facet as $facetval => $facetcnt) {
+             $facets .= '<a href=\''.$_SERVER["REQUEST_URI"].'&fq=source:"'.$facetval.'"\'>'.$facetval.' ('.$facetcnt.')</a><br />';
+           }
+          }
+        }
+      print "<p>$facets</p>";
+      $response = $results->response;
+        if ($response->numFound == 0) {
+          printf(__('<div id="noresults">No Results Found</div>', 'solr4wp'));
+        } 
+         else {     
+           $i=0;                   
+          foreach ( $response->docs as $doc ) {
+            $i++;
+            print(__('<div class="result">', 'solr4wp'));
+            if($doc->url) {
+              print '<h3><a href="'.$doc->url.'">'.$doc->desc.'</a></h3>';
+            }
+             else {
+               print "<h3>$doc->desc</h3>";
+             }
+            $docid = strval($doc->id);
+            $docteaser = $teasers[$docid];
+            if ($docteaser->content) {
+                printf(__('<p>...%s...</p></div>', 'solr4wp'), implode('...', $docteaser->content));
+            } 
+             else {
+                $words = split(' ', @implode('<br />',$doc->data));
+                $teaser = implode(' ', array_slice($words, 0, 30));
+                printf(__('<p>%s</p></div>', 'solr4wp'), $teaser);
+            }
+          }
+        }
 }
 
 ?>

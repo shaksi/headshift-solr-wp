@@ -107,8 +107,6 @@
     <field name="categories" type="string" indexed="true" stored="true" multiValued="true"/>
 	  <field name="categoriessrch" type="text_lws" indexed="true" stored="false" multiValued="true"/>
 	
-	  <field name="organisations" type="string" indexed="true" stored="true" multiValued="true"/>
-	
     <field name="tags" type="string" indexed="true" stored="true" multiValued="true"/>
 	  <field name="tagssrch" type="text_lws" indexed="true" stored="false" multiValued="true"/>
 
@@ -117,7 +115,6 @@
     <field name="post_type" type="string" indexed="true" stored="true"/>
     
     <field name="language" type="string" indexed="true" stored="true"/>
-    <field name="postdate" type="date" indexed="true" stored="true"/>
     
     <!-- composite field -->
     <field name="text" type="text" indexed="true" stored="false" multiValued="true"/>
@@ -130,6 +127,9 @@
     <dynamicField name="*_f"  type="sfloat"  indexed="true"  stored="true"/>
     <dynamicField name="*_d"  type="sdouble" indexed="true"  stored="true"/>
     <dynamicField name="*_dt" type="date"    indexed="true"  stored="true"/>
+    
+    <dynamicField name="*_taxonomy" type="string" indexed="true" stored="true"/>
+    
     <dynamicField name="random*" type="random" />
   </fields>
 
@@ -142,15 +142,4 @@
   <copyField source="tags" dest="tagssrch"/>
   <copyField source="categories" dest="text"/>
   <copyField source="categories" dest="categoriessrch"/>
-  
-  <copyField source="regions" dest="regionssrch"/>
-  <copyField source="regions" dest="text"/>
-  <copyField source="themes" dest="themessrch"/>
-  <copyField source="themes" dest="text"/>
-  <copyField source="resources" dest="resourcessrch"/>
-  <copyField source="resources" dest="text"/>
-  <copyField source="projects" dest="projectssrch"/>
-  <copyField source="projects" dest="text"/>
-  <copyField source="series" dest="seriessrch"/>
-  <copyField source="series" dest="text"/>
 </schema>
