@@ -25,7 +25,7 @@
 if (get_option('s4w_solr_initialized') != '1') {
     update_option('s4w_solr_host', 'localhost');
     update_option('s4w_solr_port', '8983');
-    update_option('s4w_solr_path', '/solr');
+    update_option('s4w_solr_path', array('/solr'));
     
     update_option('s4w_content_index', array());
     update_option('s4w_content_delete', array());
@@ -60,7 +60,7 @@ function s4w_message_output($msg) {
 
 # check for any POST settings
 if ($_POST['s4w_ping']) {
-  if (s4w_get_solr(true)) {
+  if (s4w_get_solr(0,true)) {
     print s4w_message_output('Ping Success!');
   } 
    else {

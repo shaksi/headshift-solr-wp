@@ -1,16 +1,18 @@
+<?php 
+/**
 <form method="get" action ="<?php $_SERVER["REQUEST_URI"]?>">
 <input type="text" name="q" value="<?php _e(get_option('s4w_solr_port'), 'solr4wp'); ?>" />
 <input type="submit" value="Search"/>
 </form>
-<?php 
+
 
 $q = ($_GET[q])?$_GET[q]:'*:*';
 $fq= stripslashes($_GET['fq']);
-$path = get_option('s4w_solr_path');
+
 // krumo($path);
 // krumo( s4w_get_solr());
   //solr_query_ruby_core($q,$fq);
-
+*/
 ?>
 
 
@@ -19,11 +21,10 @@ $parent_taxonomy = get_taxonomies(array('_builtin'=>FALSE),'names');
 $parent_taxonomy['categories'] = 'categories';
 $parent_taxonomy['tags'] = 'tags';
 
-// krumo($parent_taxonomy);
+$path = get_option('s4w_solr_path');
 //get a a list of all the available content types so we render out some options
 $post_types = s4w_get_all_post_types();
 $indexable_content = get_option('s4w_content_index');
-
 
 ?>
 <div id="s4w-tabs" class="wrap ui-tabs-panel ui-widget-content ui-corner-bottom">
@@ -50,10 +51,14 @@ $indexable_content = get_option('s4w_content_index');
         <td><input type="text" name="s4w_solr_port" value="<?php _e(get_option('s4w_solr_port'), 'solr4wp'); ?>" /></td>
     </tr>
 
-    <tr valign="top">
-        <th scope="row"><?php _e('Solr Path', 'solr4wp') ?></th>
-        <td><input type="text" name="s4w_solr_path" value="<?php _e(get_option('s4w_solr_path'), 'solr4wp'); ?>" /></td>
-    </tr>
+      <?php //get the default path and include an extra path incase 2cores are to be used
+      for ($x=0;count($path)+1>$x;$x++){
+      ?>
+      <tr valign="top">
+          <th scope="row"><?php _e('Solr Path (Core'.$x.')', 'solr4wp') ?></th>
+          <td><input type="text" name="s4w_solr_path[]" value="<?= $path[$x]; ?>" /></td>
+      </tr>
+      <?php } ?>
 </table>
 <hr />
 <p class="submit">

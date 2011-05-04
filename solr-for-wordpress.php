@@ -40,20 +40,18 @@ if (version_compare($wp_version, '2.7', '<')) {
 
 require_once(WP_PLUGIN_DIR. '/solr-for-wordpress/Apache/Solr/Service.php');
 
-function s4w_get_solr($ping = false) {
+function s4w_get_solr($core=0, $ping = false) {
     # get the connection options
     $host = get_option('s4w_solr_host');
     $port = get_option('s4w_solr_port');
     $path = get_option('s4w_solr_path');
-    
     # double check everything has been set
-    if ( ! ($host and $port and $path) ) {
+    if ( ! ($host and $port and $path[$core]) ) {
         return NULL;
     }
     
     # create the solr service object
-    $solr = new Apache_Solr_Service($host, $port, $path);
-    
+    $solr = new Apache_Solr_Service($host, $port, $path[$core]);
     # if we want to check if the server is alive, ping it
     if ($ping) {
         if ( ! $solr->ping() ) {
@@ -332,68 +330,17 @@ function s4w_search_results() {
           $header = $results->responseHeader;
           $teasers = get_object_vars($results->highlighting);
         
-          
-        
+          // if ($output_info) {
+          //   $outinfo = __('<div id="resultinfo"><p>Found <em id="resultcnt">%d</em> results for <em id="resultqry">%s</em> in <em id="qrytime">%.3f</em> seconds.</p></div><div id="infoclear"></div>', 'solr4wp'); 
+          //   printf($outinfo, $response->numFound, htmlspecialchars($qry), $header->QTime/1000);
+          // }
+          //         
        
         
-          print(__('<section id="search-results">', 'solr4wp'));
-					print(__('<h1>Search Results</h1>', 'solr4wp'));
-        	if ($output_info) {
-            $outinfo = __('<h2 id="resultinfo"><p>Found <em id="resultcnt">%d</em> results for <em id="resultqry">%s</em> in <em id="qrytime">%.3f</em> seconds.</p></h2>', 'solr4wp'); 
-            printf($outinfo, $response->numFound, htmlspecialchars($qry), $header->QTime/1000);
-          }
-
-          if ($response->numFound == 0) {
-              printf(__('<div id="noresults">No Results Found</div>', 'solr4wp'));
-          } else {
-                          
-              foreach ( $response->docs as $doc ) {
-                  print(__('<article class="result">', 'solr4wp'));
-                  $titleout = __('<h2><a href="%s">%s</a></h2><h3>by <em id="resultauthor">%s</em> has a score of <em id="resultscore">%f</em></h3>', 'solr4wp');
-                  printf($titleout, $doc->permalink, $doc->title, $doc->author, $doc->score);
-                  $docid = strval($doc->id);
-                  $docteaser = $teasers[$docid];
-                  if ($docteaser->content) {
-                      printf(__('<p>...%s...</p></div>', 'solr4wp'), implode('...', $docteaser->content));
-                  } else {
-                      $words = split(' ', $doc->content);
-                      $teaser = implode(' ', array_slice($words, 0, 30));
-                      printf(__('<p>%s...</p></article>', 'solr4wp'), $teaser);
-                  }
-              }
-          }
-
-  				if ($output_pager) {      
-                # calculate the number of pages
-                $numpages = ceil($response->numFound / $count);
-                $currentpage = ceil($offset / $count) + 1;
-
-                if ($numpages == 0) {
-                    $numpages = 1;
-                }
-
-                print(__('<div id="resultpager"><ul>', 'solr4wp'));
-                foreach (range(1, $numpages) as $pagenum) {
-                  if ( $pagenum != $currentpage ) {
-                      $offsetnum = ($pagenum - 1) * $count;
-                      $pagenum = __($pagenum, 'solr4wp');
-                      $itemout = '<li><a href="?s=%s&fq=%s&offset=%d&count=%d">%d</a></li>';
-                      
-                      printf($itemout, urlencode($qry),htmlspecialchars(stripslashes($fq)),  $offsetnum, $count, $pagenum);
-                  } 
-                   else {
-                      printf(__('<li>%d</li>', 'solr4wp'), $pagenum);
-                  }
-                }
-                print(__('</ul></div><div id="pagerclear"></div>', 'solr4wp'));
-            }
-
-          printf(__('</section>', 'solr4wp'));
-
-
-					if ($output_facets) {
+          if ($output_facets) {
+            
             # handle facets
-            print(__('<aside id="sidebar"><ul class="facets">', 'solr4wp'));
+            print(__('<aside id="facets"><ul class="facets">', 'solr4wp'));
             if($results->facet_counts) {
               foreach ($results->facet_counts->facet_fields as $facetfield => $facet) {
                 if ( ! get_object_vars($facet) ) {
@@ -449,8 +396,10 @@ function s4w_search_results() {
               }
             }
           }
-        	
-					//show the used facets
+        
+          print(__('</ul></aside>', 'solr4wp'));
+        
+          //show the used facets
           if(count($result_facet_used)>0) {
             print '<div class="result_facets_used">';
   					print '<p>To remove a search filter, click [x]</p>';
@@ -459,16 +408,60 @@ function s4w_search_results() {
             }
             print '</div>';
           }
-
-          print(__('</ul></aside>', 'solr4wp'));
         
-          
+          print(__('<div id="results">', 'solr4wp'));
+        
+          if ($response->numFound == 0) {
+              printf(__('<div id="noresults">No Results Found</div>', 'solr4wp'));
+          } else {
+                          
+              foreach ( $response->docs as $doc ) {
+                  print(__('<div class="result">', 'solr4wp'));
+                  $titleout = __('<h2><a href="%s">%s</a></h2><h3>by <em id="resultauthor">%s</em> has a score of <em id="resultscore">%f</em></h3>', 'solr4wp');
+                  printf($titleout, $doc->permalink, $doc->title, $doc->author, $doc->score);
+                  $docid = strval($doc->id);
+                  $docteaser = $teasers[$docid];
+                  if ($docteaser->content) {
+                      printf(__('<p>...%s...</p></div>', 'solr4wp'), implode('...', $docteaser->content));
+                  } else {
+                      $words = split(' ', $doc->content);
+                      $teaser = implode(' ', array_slice($words, 0, 30));
+                      printf(__('<p>%s...</p></div>', 'solr4wp'), $teaser);
+                  }
+              }
+          }
+
+  				if ($output_pager) {      
+                # calculate the number of pages
+                $numpages = ceil($response->numFound / $count);
+                $currentpage = ceil($offset / $count) + 1;
+
+                if ($numpages == 0) {
+                    $numpages = 1;
+                }
+
+                print(__('<div id="resultpager"><ul>', 'solr4wp'));
+                foreach (range(1, $numpages) as $pagenum) {
+                  if ( $pagenum != $currentpage ) {
+                      $offsetnum = ($pagenum - 1) * $count;
+                      $pagenum = __($pagenum, 'solr4wp');
+                      $itemout = '<li><a href="?s=%s&fq=%s&offset=%d&count=%d">%d</a></li>';
+                      
+                      printf($itemout, urlencode($qry),htmlspecialchars(stripslashes($fq)),  $offsetnum, $count, $pagenum);
+                  } 
+                   else {
+                      printf(__('<li>%d</li>', 'solr4wp'), $pagenum);
+                  }
+                }
+                print(__('</ul></div><div id="pagerclear"></div>', 'solr4wp'));
+            }
+
+          printf(__('</div>', 'solr4wp'));
+          print(__('</div>', 'solr4wp'));
+
       }
   } 
-
 }
-
-
 
 function s4w_print_taxo($facet, $taxo, $prefix, $fqstr, $field, $facet_used='facet_not_used') {
     
@@ -557,7 +550,7 @@ function s4w_options_init() {
 
     register_setting( 's4w-options-group', 's4w_solr_host', 'wp_filter_nohtml_kses' );
     register_setting( 's4w-options-group', 's4w_solr_port', 'absint' );
-    register_setting( 's4w-options-group', 's4w_solr_path', 'wp_filter_nohtml_kses' );
+    //register_setting( 's4w-options-group', 's4w_solr_path', 'wp_filter_nohtml_kses' );
     
  
     register_setting( 's4w-options-group', 's4w_private_post', 'wp_filter_nohtml_kses' );
@@ -805,8 +798,6 @@ function s4w_get_facet_result_count($fqitms, $searchtxt="") {
 }
 
 function solr_query_ruby_core($qry, $fq) {
-  // krumo($qry);
-  // krumo($fq);
      $solr = s4w_get_solr();
      $response = NULL;
 
