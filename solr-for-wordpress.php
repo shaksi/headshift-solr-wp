@@ -409,14 +409,14 @@ function s4w_search_results() {
             print '</div>';
           }
         
-          print(__('<div id="results">', 'solr4wp'));
+          print(__('<section id="search-results">', 'solr4wp'));
         
           if ($response->numFound == 0) {
               printf(__('<div id="noresults">No Results Found</div>', 'solr4wp'));
           } else {
                           
               foreach ( $response->docs as $doc ) {
-                  print(__('<div class="result">', 'solr4wp'));
+                  print(__('<article class="result">', 'solr4wp'));
                   $titleout = __('<h2><a href="%s">%s</a></h2><h3>by <em id="resultauthor">%s</em> has a score of <em id="resultscore">%f</em></h3>', 'solr4wp');
                   printf($titleout, $doc->permalink, $doc->title, $doc->author, $doc->score);
                   $docid = strval($doc->id);
@@ -426,7 +426,7 @@ function s4w_search_results() {
                   } else {
                       $words = split(' ', $doc->content);
                       $teaser = implode(' ', array_slice($words, 0, 30));
-                      printf(__('<p>%s...</p></div>', 'solr4wp'), $teaser);
+                      printf(__('<p>%s...</p></article>', 'solr4wp'), $teaser);
                   }
               }
           }
@@ -456,8 +456,7 @@ function s4w_search_results() {
                 print(__('</ul></div><div id="pagerclear"></div>', 'solr4wp'));
             }
 
-          printf(__('</div>', 'solr4wp'));
-          print(__('</div>', 'solr4wp'));
+          print(__('</section>', 'solr4wp'));
 
       }
   } 
