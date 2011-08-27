@@ -1,3 +1,162 @@
 <style type="text/css">
+/*---------------------------------
+	Search
+---------------------------------*/
+/*----- aside -----*/
 
+aside#sidebar {
+	position: relative;
+	float: right;
+	width: 349px;
+	padding: 0;
+	border-left: 1px solid #CCC;
+}
+
+
+aside#sidebar h3 {
+	background: #408FD0;
+	margin: 0;
+	padding: 10px 10px;
+	width: 310px;
+	height: 30px;
+	color: #FFF;
+	font-size: 1.8em;
+	line-height: 1.5em;
+	font-weight: 500;
+	border-left: 10px solid #3A82BF;
+}
+aside#sidebar h3.post {
+	background: #9F9F9F;
+	border-left: 10px solid #939393;
+}
+aside#sidebar h4 {
+	position: relative;
+	background: #9F9F9F;
+	margin: 0;
+	padding: 5px 10px;
+	width: 310px;
+	height: 15px;
+	color: #FFF;
+	font-size: 1.3em;
+	line-height: 1.3em;
+	text-transform: uppercase;
+	font-weight: bold;
+	border-left: 10px solid #939393;
+}
+body.search-results #searchbox div {
+	background: #408FD0;
+	margin: 0;
+	padding: 10px 10px;
+	width: 930px;
+	height: 30px;
+	color: #FFF;
+	font-size: 1.8em;
+	line-height: 1.5em;
+	font-weight: 500;
+	border-left: 10px solid #3A82BF;
+}
+body.search-results #searchbox div input#qrybox {border: none; padding: 3px 10px; font-size: 15px;}
+
+#search-results {
+	float: left;
+	background: #FFF url("../images/grey-margin.png") top left repeat-y;
+	width: 619px;
+}
+#search-results h1 {
+	margin: 0;
+	padding: 10px 10px 10px 20px;
+	height: 30px;
+	color: #4F4F4F;
+	font-size: 1.8em;
+	line-height: 1.5em;
+	font-weight: 500;
+	background: #FFF url("../images/grey-margin.png") top left repeat-y;
+}
+#search-results h2#resultinfo {
+	background: #D1D1D1;
+	margin: 0;
+	padding: 5px 10px;
+	height: 20px;
+	color: #FFF;
+	font-size: 1.5em;
+	line-height: 1.3em;
+	font-weight: 500;
+	border-left: 10px solid #C3C3C3;
+}
+#search-results #resultpager {
+	width: 580px;
+	float: left;
+	padding: 10px 20px;
+	font-size: 1.3em;
+}
+
+#search-results article {
+	float: left;
+	width: 560px;
+	margin: 10px 20px 10px 20px;
+	padding: 0 0 10px 0;
+	border-bottom: 1px solid #E6E6E6;
+}
+#search-results article h2 a {color: #4F4F4F; font-size: 2em; line-height: 1.4em; font-weight: bold;}
+#search-results article h3 {font-size: 1.2em; color: #666; margin: 5px 0;}
+#search-results article p {margin: 5px 0 15px 0; font-size: 1.4em; line-height: 1.4em;}
+
+#sidebar ul.facets li.facet {
+	list-style-type: none;
+	background: #FFF url("../images/grey-margin.png") top left repeat-y;
+}
+#sidebar ul.facets li.facet li {
+	margin: 7px 10px 7px 20px;
+	font-size: 1.3em;
+	line-height: 1.4em;
+}
+
+#sidebar ul.facets li.facet h3 {
+	position: relative;
+	background: #9F9F9F;
+	margin: 0;
+	padding: 5px 10px;
+	width: 310px;
+	height: 15px;
+	color: #FFF;
+	font-size: 1.3em;
+	line-height: 1.3em;
+	text-transform: uppercase;
+	font-weight: bold;
+	border-left: 10px solid #939393;
+	list-style: circle outside none;
+}
+.result_facets_used {background: #FFF url("../images/grey-margin.png") top left repeat-y;}
+.result_facets_used p {
+	position: relative;
+	background: #D1D1D1;
+	margin: 0;
+	padding: 5px 10px;
+	width: 310px;
+	height: 15px;
+	color: #FFF;
+	font-size: 1.3em;
+	line-height: 1.3em;
+	border-left: 10px solid #C3C3C3;	
+}
+.result_facets_used .result_facet_used {
+	padding: 10px 10px 0px 20px;
+	font-size: 1.3em;
+	line-height: 1.1em;
+}
+
+
+#resultpager ul {
+	margin-left: 0;
+	padding-left: 0;
+	display: inline;
+	} 
+
+#resultpager ul li {
+	margin-left: 0;
+	padding: 3px 15px;
+	border-left: 1px solid #000;
+	list-style: none;
+	display: inline;
+	}
 </style>
