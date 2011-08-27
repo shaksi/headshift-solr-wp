@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Solr for WordPress
-Plugin URI: https://launchpad.net/solr4wordpress
+Plugin URI: #
 Description: Indexes, removes, and updates documents in the Solr search engine.
 Version: 0.3.0
 Author Shakur Shidane
@@ -156,41 +156,43 @@ function s4w_build_document( $post_info ) {
 }
 
 function s4w_post( $documents ) { 
-    try {
-        $solr = s4w_get_solr();
-        if ( ! $solr == NULL ) {
-            $solr->addDocuments( $documents );
-            $solr->commit();
-            return true;
-        }
-    } catch ( Exception $e ) {
-        echo $e->getMessage();
+  try {
+    $solr = s4w_get_solr();
+    if ( ! $solr == NULL ) {
+      $solr->addDocuments( $documents );
+      $solr->commit();
+      return true;
     }
-    
+  } 
+   catch ( Exception $e ) {
+      echo $e->getMessage();
+  }   
 }
 
 function s4w_delete( $doc_id ) {
-    try {
-        $solr = s4w_get_solr();
-        if ( ! $solr == NULL ) {
-            $solr->deleteById( $doc_id );
-            $solr->commit();
-        }
-    } catch ( Exception $e ) {
-        echo $e->getMessage();
+  try {
+    $solr = s4w_get_solr();
+    if ( ! $solr == NULL ) {
+        $solr->deleteById( $doc_id );
+        $solr->commit();
     }
+  } 
+   catch ( Exception $e ) {
+      echo $e->getMessage();
+  }
 }
 
 function s4w_delete_all() {
-    try {
-        $solr = s4w_get_solr();
-        if ( ! $solr == NULL ) {
-            $solr->deleteByQuery( '*:*' );
-            $solr->commit();
-        }
-    } catch ( Exception $e ) {
-        echo $e->getMessage();
+  try {
+    $solr = s4w_get_solr();
+    if ( ! $solr == NULL ) {
+      $solr->deleteByQuery( '*:*' );
+      $solr->commit();
     }
+  } 
+   catch ( Exception $e ) {
+      echo $e->getMessage();
+  }
 }
 
 function s4w_handle_modified( $post_id ) {
@@ -212,24 +214,24 @@ function s4w_handle_modified( $post_id ) {
 }
 
 function s4w_handle_status_change( $post_info ) {
-    //$post_info = get_post( $post_id );
-    $private_content = get_option('s4w_content_private');
-    //which content type should be removed from the index if it's status changes
-    if (array_key_exists($post_info->post_type,$private_content)) {
-        if ( ($_POST['prev_status'] == 'publish' || $_POST['original_post_status'] == 'publish') && 
-                ($post_info->post_status == 'draft' || $post_info->post_status == 'private') ) {
-                    s4w_delete( $post_info->ID );
-        }
+  //$post_info = get_post( $post_id );
+  $private_content = get_option('s4w_content_private');
+  //which content type should be removed from the index if it's status changes
+  if (array_key_exists($post_info->post_type,$private_content)) {
+    if ( ($_POST['prev_status'] == 'publish' || $_POST['original_post_status'] == 'publish') && 
+         ($post_info->post_status == 'draft' || $post_info->post_status == 'private') ) {
+          s4w_delete( $post_info->ID );
     }
+  }
 }
 
 function s4w_handle_delete( $post_id ) {
-    $post_info = get_post( $post_id );
-    $delete_content = get_option('s4w_content_delete');
-    //which content type should be removed from the index if it's deleted
-    if (array_key_exists($post_info->post_type,$delete_content)) {
-        s4w_delete( $post_info->ID );
-    }
+  $post_info = get_post( $post_id );
+  $delete_content = get_option('s4w_content_delete');
+  //which content type should be removed from the index if it's deleted
+  if (array_key_exists($post_info->post_type,$delete_content)) {
+    s4w_delete( $post_info->ID );
+  }
 }
 
 function s4w_load_all_content($type) {
@@ -241,46 +243,50 @@ function s4w_load_all_content($type) {
   $where_and = " AND post_type = '$type'";
 
   if (!in_array($type,$indexable_type) && $type !='all') { 
-  return false;
-   
+    return false;
   }
+  
   $where_and = ($type =='all') ?"AND post_type IN ('".implode("', '", $indexable_type). "')": " AND post_type = '$type'";
   $posts = $wpdb->get_results("SELECT ID FROM $wpdb->posts WHERE post_status='publish' $where_and" );
   if ( $posts ) {
     $documents = array();
     foreach ( $posts as $post ) {
-        $documents[] = s4w_build_document( get_post($post->ID) );
+      $documents[] = s4w_build_document( get_post($post->ID) );
     } 
     return s4w_post( $documents );
   }
 }
 
 function s4w_get_all_post_types() {
-    global $wpdb;
-    $query = $wpdb->get_results("SELECT DISTINCT(post_type) FROM $wpdb->posts WHERE post_type NOT IN('attachment', 'revision', 'nav_menu_item') ORDER BY post_type");
-    if ( $query ) {
-        $types = array();
-        foreach ( $query as $type ) {
-            $types[] = $type->post_type;
-        }       
-        return $types;
-    }
+  global $wpdb;
+  $sql = "SELECT DISTINCT(post_type) 
+          FROM $wpdb->posts 
+          WHERE post_type NOT IN('attachment', 'revision', 'nav_menu_item') 
+          ORDER BY post_type";
+  $query = $wpdb->get_results($sql);
+  if ($query) {
+    $types = array();
+    foreach ( $query as $type ) {
+      $types[] = $type->post_type;
+    }       
+    return $types;
+  }
 }
 
 function s4w_search_form() {
-   $form = '<form name="searchbox" method="get" id="searchbox" action="">
-							<div>
-                <input type="text" id="qrybox" name="s" value="%s"/>
-                <input type="hidden" id="query" name="fq" value="%s"/>
-                <input type="hidden" id="offset" name="offset" value="%s"/>
-                <input type="hidden" id="count" name="count" value="%s"/>
-                <input type="submit" id="searchbtn" />
-							</div>	
-              </form>';
-    $output= __($form, 'solr4wp');
-    $chkquery = ($_POST['chkquery']==1)?'checked="yes"':'';
+  $form = '<form name="searchbox" method="get" id="searchbox" action="">
+  					<div>
+              <input type="text" id="qrybox" name="s" value="%s"/>
+              <input type="hidden" id="query" name="fq" value="%s"/>
+              <input type="hidden" id="offset" name="offset" value="%s"/>
+              <input type="hidden" id="count" name="count" value="%s"/>
+              <input type="submit" id="searchbtn" />
+  					</div>	
+            </form>';
+  $output= __($form, 'solr4wp');
+  $chkquery = ($_POST['chkquery']==1)?'checked="yes"':'';
 
-    printf($output, stripslashes($_GET['s']), htmlspecialchars($_GET['fq']), $_GET['offset'], $_GET['count'], $chkquery);
+  printf($output, stripslashes($_GET['s']), htmlspecialchars($_GET['fq']), $_GET['offset'], $_GET['count'], $chkquery);
 }
 
 function s4w_search_results($qry = NULL, $offset = NULL, $count = NULL, $fq = NULL, $core = 0, $query_function = NULL, $required_facets=array()){
@@ -356,14 +362,14 @@ function s4w_search_results($qry = NULL, $offset = NULL, $count = NULL, $fq = NU
 
       
         if ($output_pager) {
-          s4w_search_pager($response, $count, $offset);
+          s4w_search_pager($response, $qry, $count, $offset);
         }
       printf(__('</section>', 'solr4wp'));
 
     }
     if ($output_facets) {
       //print the facets block and the show the select facets if any
-      s4w_search_facets($results, $fqitms);
+      s4w_search_facets($results, $qry, $fqitms);
     }
   } 
 }
@@ -371,7 +377,7 @@ function s4w_search_results($qry = NULL, $offset = NULL, $count = NULL, $fq = NU
 
 
 
-function s4w_search_pager($response, $count, $offset) {
+function s4w_search_pager($response, $qry, $count, $offset) {
     # calculate the number of pages
     $numpages = ceil($response->numFound / $count);
     $currentpage = ceil($offset / $count) + 1;
@@ -403,7 +409,7 @@ function s4w_search_pager($response, $count, $offset) {
  *        the facets are extracted from
  * @param $fqitms array of selected facets
  */
-function s4w_search_facets($results, $fqitms) {
+function s4w_search_facets($results, $qry, $fqitms) {
   $fqstr = '';
   $query_values=array();
   foreach ((array)$fqitms as $fqitem) {
