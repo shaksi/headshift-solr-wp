@@ -34,7 +34,7 @@ $errmsg = __('Solr for WordPress requires WordPress 2.7 or greater. ', 'solr4wp'
 if (version_compare($wp_version, '2.7', '<')) {
     exit ($errmsg);
 }
-require_once(WP_PLUGIN_DIR. '/solr-for-wordpress/includes/solr_config.php');
+require_once(WP_PLUGIN_DIR. '/solr-for-wordpress/inc/solr_config.php');
 require_once(WP_PLUGIN_DIR. '/solr-for-wordpress/Apache/Solr/Service.php');
 
 function s4w_get_solr($core=0, $ping = false) {

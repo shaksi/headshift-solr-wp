@@ -66,9 +66,9 @@ function s4w_add_pages() {
 }
 
 function s4w_options_page() {
-  if ( file_exists (WP_PLUGIN_DIR. '/solr-for-wordpress/includes/options_page.php' )) {
-    include_once(WP_PLUGIN_DIR. '/solr-for-wordpress/includes/options_page.php' );
-    include_once(WP_PLUGIN_DIR. '/solr-for-wordpress/includes/admin_ui.php' );
+  if ( file_exists (WP_PLUGIN_DIR. '/solr-for-wordpress/inc/options_page.php' )) {
+    include_once(WP_PLUGIN_DIR. '/solr-for-wordpress/inc/options_page.php' );
+    include_once(WP_PLUGIN_DIR. '/solr-for-wordpress/inc/admin_ui.php' );
   } 
    else {
      _e("<p>Couldn't locate the options page.</p>", 'solr4wp');
@@ -121,7 +121,7 @@ add_action('trashed_post','s4w_handle_delete');
 add_action('admin_menu', 's4w_add_pages');
 
 if (isset($_GET['page'])) { 
-  if ($_GET['page'] == "solr-for-wordpress/includes/solr_config.php") {
+  if ($_GET['page'] == "solr-for-wordpress/inc/solr_config.php") {
     add_action( 'admin_init', 's4w_options_init');
   }
 }
