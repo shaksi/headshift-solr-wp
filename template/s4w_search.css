@@ -10,9 +10,20 @@ aside#sidebar {
 	width: 349px;
 	padding: 0;
 	border-left: 1px solid #CCC;
+	top: 47px;
 }
 
 
+aside#sidebar li {
+  list-style: none outside none;
+}
+aside#sidebar ul {
+  margin-left: 1px; 
+  margin-bottom: 0px;
+}
+form#searchbox {
+  border-left: 10px solid #C3C3C3;
+}
 aside#sidebar h3 {
 	background: #408FD0;
 	margin: 0;
@@ -59,7 +70,7 @@ body.search-results #searchbox div input#qrybox {border: none; padding: 3px 10px
 
 #search-results {
 	float: left;
-	background: #FFF url("../images/grey-margin.png") top left repeat-y;
+	background: #FFF url("wp-content/plugins/solr-for-wordpress/template/images/grey-margin.png") top left repeat-y;
 	width: 619px;
 }
 #search-results h1 {
@@ -70,7 +81,7 @@ body.search-results #searchbox div input#qrybox {border: none; padding: 3px 10px
 	font-size: 1.8em;
 	line-height: 1.5em;
 	font-weight: 500;
-	background: #FFF url("../images/grey-margin.png") top left repeat-y;
+	background: #FFF url("wp-content/plugins/solr-for-wordpress/template/images/grey-margin.png") top left repeat-y;
 }
 #search-results h2#resultinfo {
 	background: #D1D1D1;
@@ -101,9 +112,9 @@ body.search-results #searchbox div input#qrybox {border: none; padding: 3px 10px
 #search-results article h3 {font-size: 1.2em; color: #666; margin: 5px 0;}
 #search-results article p {margin: 5px 0 15px 0; font-size: 1.4em; line-height: 1.4em;}
 
-#sidebar ul.facets li.facet {
+aside#sidebar ul.facets li.facet {
 	list-style-type: none;
-	background: #FFF url("../images/grey-margin.png") top left repeat-y;
+	background: #FFF url("wp-content/plugins/solr-for-wordpress/template/images/grey-margin.png") top left repeat-y;
 }
 #sidebar ul.facets li.facet li {
 	margin: 7px 10px 7px 20px;
@@ -124,9 +135,10 @@ body.search-results #searchbox div input#qrybox {border: none; padding: 3px 10px
 	text-transform: uppercase;
 	font-weight: bold;
 	border-left: 10px solid #939393;
-	list-style: circle outside none;
 }
-.result_facets_used {background: #FFF url("../images/grey-margin.png") top left repeat-y;}
+
+
+.result_facets_used {background: #FFF url("wp-content/plugins/solr-for-wordpress/template/images/grey-margin.png") top left repeat-y;}
 .result_facets_used p {
 	position: relative;
 	background: #D1D1D1;

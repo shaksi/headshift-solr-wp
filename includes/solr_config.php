@@ -76,12 +76,16 @@ function s4w_options_page() {
 }
 
 function s4w_default_head() {
-    // include our default css 
-    if (file_exists(WP_PLUGIN_DIR . '/solr-for-wordpress/template/search.css')) {
-        include_once(WP_PLUGIN_DIR . '/solr-for-wordpress/template/search.css');
-    }
+    // include our default css     
+  if (file_exists(TEMPLATEPATH . '/s4w_search.css')) {
+      // use theme file
+      include_once(TEMPLATEPATH . '/s4w_search.css');
+  }
+  else if (file_exists(WP_PLUGIN_DIR . '/solr-for-wordpress/template/s4w_search.css')) {
+    include_once(WP_PLUGIN_DIR . '/solr-for-wordpress/template/s4w_search.css');
+  }
 
-    
+  
 }
 
 function s4w_template_redirect() {
@@ -90,19 +94,20 @@ function s4w_template_redirect() {
     if ( stripos($_SERVER['REQUEST_URI'], '?s=') == false || $_GET['type'] =='google' ) {
         return;
     }
+    add_action('wp_head', 's4w_default_head');
     
     if (file_exists(TEMPLATEPATH . '/s4w_search.php')) {
         // use theme file
         include_once(TEMPLATEPATH . '/s4w_search.php');
     } else if (file_exists(WP_PLUGIN_DIR. '/solr-for-wordpress/template/s4w_search.php')) {
-        // use plugin supplied file
-        add_action('wp_head', 's4w_default_head');
+        // use plugin file
         include_once(WP_PLUGIN_DIR. '/solr-for-wordpress/template/s4w_search.php');
     } else {
         // no template files found, just continue on like normal
         // this should get to the normal WordPress search results
         return;
     }
+    //add search.css unless its been overwritten in the template directory
     
     exit;
 }

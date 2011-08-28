@@ -275,13 +275,11 @@ function s4w_get_all_post_types() {
 
 function s4w_search_form() {
   $form = '<form name="searchbox" method="get" id="searchbox" action="">
-  					<div>
               <input type="text" id="qrybox" name="s" value="%s"/>
               <input type="hidden" id="query" name="fq" value="%s"/>
               <input type="hidden" id="offset" name="offset" value="%s"/>
               <input type="hidden" id="count" name="count" value="%s"/>
               <input type="submit" id="searchbtn" />
-  					</div>	
             </form>';
   $output= __($form, 'solr4wp');
   $chkquery = ($_POST['chkquery']==1)?'checked="yes"':'';

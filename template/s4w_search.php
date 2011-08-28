@@ -1,6 +1,6 @@
 <?php
 /*
-Template Name: Search
+Template Name: Search Template
 */
 ?>
 
